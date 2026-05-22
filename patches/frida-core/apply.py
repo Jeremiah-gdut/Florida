@@ -108,15 +108,22 @@ print("\n[0002] frida_agent_so")
 lh = filepath('src/linux/linux-host-session.vala')
 if os.path.exists(lh):
     c = read(lh)
-    # Insert random_prefix before agent = new AgentDescriptor
-    # Change PathTemplate ("frida-agent-<arch>.so") to PathTemplate (random_prefix + "-<arch>.so")
-    marker = 'agent = new AgentDescriptor (PathTemplate ("frida-agent-<arch>.so")'
-    if marker in c:
-        c = c.replace(
-            marker,
-            'var random_prefix = GLib.Uuid.string_random();\n\t\t\tagent = new AgentDescriptor (PathTemplate (random_prefix + "-<arch>.so")'
-        )
-        # Replace resource names: remove quotes around frida-agent-arm.so, use random_prefix
+    lines = c.split('\n')
+    found = False
+    for i, line in enumerate(lines):
+        # Find PathTemplate line containing frida-agent-<arch>
+        if 'PathTemplate' in line and 'frida-agent-<arch>' in line:
+            # Insert random_prefix declaration before this line
+            indent = line[:len(line) - len(line.lstrip())]
+            lines.insert(i, indent + 'var random_prefix = GLib.Uuid.string_random();')
+            # Rewrite the PathTemplate line: remove quotes around "frida-agent-<arch>.so"
+            # Old: PathTemplate ("frida-agent-<arch>.so") -> New: PathTemplate (random_prefix + "-<arch>.so")
+            lines[i+1] = line.replace('"frida-agent-<arch>.so"', 'random_prefix + "-<arch>.so"')
+            found = True
+            break
+    if found:
+        c = '\n'.join(lines)
+        # Replace resource names
         c = c.replace(
             'new AgentResource ("frida-agent-arm.so"',
             'new AgentResource (random_prefix + "-arm.so"'
@@ -128,20 +135,7 @@ if os.path.exists(lh):
         write(lh, c)
         print("  OK: src/linux/linux-host-session.vala")
     else:
-        print("  WARN: marker not found, trying alt pattern")
-        # Fallback: use regex
-        if re.search(r'agent = new AgentDescriptor \(PathTemplate \("frida-agent-<arch>\.so"\)', c):
-            c = re.sub(
-                r'agent = new AgentDescriptor \(PathTemplate \("frida-agent-<arch>\.so"\)',
-                'var random_prefix = GLib.Uuid.string_random();\n\t\t\tagent = new AgentDescriptor (PathTemplate (random_prefix + "-<arch>.so")',
-                c
-            )
-            c = c.replace('"frida-agent-arm.so"', 'random_prefix + "-arm.so"')
-            c = c.replace('"frida-agent-arm64.so"', 'random_prefix + "-arm64.so"')
-            write(lh, c)
-            print("  OK: src/linux/linux-host-session.vala (fallback)")
-        else:
-            print("  WARN: could not find agent descriptor pattern")
+        print("  WARN: could not find PathTemplate line in linux-host-session.vala")
 else:
     print(f"  SKIP: {lh} not found")
 
