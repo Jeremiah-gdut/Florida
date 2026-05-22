@@ -139,25 +139,33 @@ jobs:
     - name: build frida for Android
       shell: bash
       run: |
+        set -e
+        
         git config --global user.name "GitHub Actions"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
         export ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}
         echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT"
         
+        FRIDA_TAG="${{ needs.check_version.outputs.FRIDA_VERSION }}"
+        echo "Building frida at tag: $FRIDA_TAG"
+        
         git clone --recurse-submodules https://github.com/frida/frida
         cd frida
-        for path in ../patches/*
-        do
-          name=$(basename $path)
-          real=$(realpath $path)
-          echo "Apply patches in $real to frida/subprojects/$name"
-          cd subprojects/$name
-          git am ../../../patches/$name/*.patch
-          cd ../..
-          echo $i
-        done
+        git fetch --tags
+        git checkout "tags/$FRIDA_TAG"
+        git submodule update --init --recursive
         cd ..
+        
+        for path in patches/*
+        do
+          name=$(basename "$path")
+          echo "Apply patches in $path to frida/subprojects/$name"
+          cd "frida/subprojects/$name"
+          git am --abort 2>/dev/null || true
+          git am --3way "../../../patches/$name/"*.patch
+          cd ../../..
+        done
         
         ARCHES="android-arm android-arm64 android-x86 android-x86_64"
         for ARCH in $ARCHES
