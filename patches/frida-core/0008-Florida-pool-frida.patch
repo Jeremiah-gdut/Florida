@@ -1,25 +1,30 @@
-From 0f3391327c044f6c2ab0ee3322185904b0afa2c5 Mon Sep 17 00:00:00 2001
-From: Ylarod <me@ylarod.cn>
-Date: Thu, 20 Jul 2023 10:01:20 +0800
-Subject: [PATCH 8/9] Florida: pool-frida
+From a07a7e076db8b961cdbb8b2a639411531f6e92d8 Mon Sep 17 00:00:00 2001
+From: Jerem1ah <1526100148@qq.com>
+Date: Sat, 23 May 2026 00:12:59 +0800
+Subject: [PATCH 08/10] Florida: pool-frida
 
 ---
- src/frida-glue.c | 2 ++
- 1 file changed, 2 insertions(+)
+ src/frida-glue.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/src/frida-glue.c b/src/frida-glue.c
-index ee8f0737..43cc8167 100644
+index 6154034e..ca907b6d 100644
 --- a/src/frida-glue.c
 +++ b/src/frida-glue.c
-@@ -40,6 +40,8 @@ frida_init_with_runtime (FridaRuntime rt)
+@@ -54,9 +54,13 @@ frida_init_with_runtime (FridaRuntime rt)
+     g_io_module_apple_register ();
+ #elif defined (HAVE_GIOOPENSSL)
      g_io_module_openssl_register ();
++
++    g_set_prgname ("ggbond");
  #endif
  
+     if (runtime == FRIDA_RUNTIME_OTHER)
 +    g_set_prgname ("ggbond");
 +
-     if (runtime == FRIDA_RUNTIME_OTHER)
      {
        main_context = g_main_context_ref (g_main_context_default ());
+       main_loop = g_main_loop_new (main_context, FALSE);
 -- 
-2.42.0
+2.53.0.windows.1
 

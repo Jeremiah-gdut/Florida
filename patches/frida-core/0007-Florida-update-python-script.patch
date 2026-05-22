@@ -1,14 +1,14 @@
-From 19026255ad926b166e7ffb8759e896fd6b5bff94 Mon Sep 17 00:00:00 2001
-From: Ylarod <me@ylarod.cn>
-Date: Tue, 18 Jul 2023 19:55:59 +0800
-Subject: [PATCH 7/9] Florida: update python script
+From ee99b8181244888c123c94f0386f0e96c7ba962f Mon Sep 17 00:00:00 2001
+From: Jerem1ah <1526100148@qq.com>
+Date: Sat, 23 May 2026 00:12:52 +0800
+Subject: [PATCH 07/10] Florida: update python script
 
 ---
  src/anti-anti-frida.py | 59 +++++++++++++++++++++++++++++-------------
  1 file changed, 41 insertions(+), 18 deletions(-)
 
 diff --git a/src/anti-anti-frida.py b/src/anti-anti-frida.py
-index b4b8dca6..d1ce5f62 100644
+index e63c631b..30bb57ec 100644
 --- a/src/anti-anti-frida.py
 +++ b/src/anti-anti-frida.py
 @@ -2,36 +2,59 @@ import lief
@@ -34,10 +34,11 @@ index b4b8dca6..d1ce5f62 100644
      if not binary:
 +        log_color(f"[*] Not elf, exit")
          exit()
+-
 +    
 +    random_name = "".join(random.sample(random_charset, 5))
 +    log_color(f"[*] Patch `frida` to `{random_name}`")
- 
++ 
      for symbol in binary.symbols:
          if symbol.name == "frida_agent_main":
              symbol.name = "main"
@@ -51,12 +52,12 @@ index b4b8dca6..d1ce5f62 100644
              symbol.name = symbol.name.replace("FRIDA", random_name)
 -
 + 
-+    all_patch_string = ["FridaScriptEngine", "GLib-GIO", "GDBusProxy", "GumScript"]  # 字符串特征修改 尽量与源字符一样
++    all_patch_string = ["FridaScriptEngine", "GLib-GIO", "GDBusProxy", "GumScript"]
 +    for section in binary.sections:
 +        if section.name != ".rodata":
 +            continue
 +        for patch_str in all_patch_string:
-+            addr_all = section.search_all(patch_str)  # Patch 内存字符串
++            addr_all = section.search_all(patch_str)
 +            for addr in addr_all:
 +                patch = [ord(n) for n in list(patch_str)[::-1]]
 +                log_color(f"[*] Patching section name={section.name} offset={hex(section.file_offset + addr)} orig:{patch_str} new:{''.join(list(patch_str)[::-1])}")
@@ -66,7 +67,7 @@ index b4b8dca6..d1ce5f62 100644
 -
 -    # gum-js-loop thread
 -    random_name = "".join(random.sample("abcdefghijklmn", 11))
--    print(f"[*] Patch `gum-js-loop` to `{random_name}`")
+-    print(f"[*] Patch `gum-js-loop` to `{random_name}"")
 + 
 +    # thread_gum_js_loop
 +    random_name = "".join(random.sample(random_charset, 11))
@@ -75,14 +76,12 @@ index b4b8dca6..d1ce5f62 100644
 -
 -    # gmain thread
 -    random_name = "".join(random.sample("abcdefghijklmn", 5))
--    print(f"[*] Patch `gmain` to `{random_name}`")
--    os.system(f"sed -b -i s/gmain/{random_name}/g {input_file}")
-\ No newline at end of file
+-    print(f"[*] Patch `gmain` to `{random_name}"")
 + 
 +    # thread_gmain
 +    random_name = "".join(random.sample(random_charset, 5))
 +    log_color(f"[*] Patch `gmain` to `{random_name}`")
-+    os.system(f"sed -b -i s/gmain/{random_name}/g {input_file}")
+     os.system(f"sed -b -i s/gmain/{random_name}/g {input_file}")
 + 
 +    # thread_gdbus
 +    random_name = "".join(random.sample(random_charset, 5))
@@ -92,5 +91,5 @@ index b4b8dca6..d1ce5f62 100644
 +    log_color(f"[*] Patch Finish")
 \ No newline at end of file
 -- 
-2.42.0
+2.53.0.windows.1
 
