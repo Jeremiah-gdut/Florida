@@ -72,32 +72,30 @@ get_rpc_str = '''
 
 if os.path.exists(rp):
     c = read(rp)
-    marker = '\t\t\tObject (peer: peer);'
-    markers = [
-        'constructor body {',
-        '\t\t\tObject (peer: peer);',
-        '\t\tbase (peer: peer);',
-    ]
-    for m in markers:
-        if m in c:
-            marker = m
+    # Insert getRpcStr BEFORE the 'call' method, not inside the constructor
+    # The 'async Json.Node call' method follows the constructor at class level
+    marker = None
+    for pat in ['public async Json.Node call (', 'public async GLib.Json.Node call (']:
+        if pat in c:
+            marker = pat
             break
-    # Insert after marker line
-    idx = c.index(marker)
-    eol = c.index('\n', idx)
-    c = c[:eol+1] + get_rpc_str + c[eol+1:]
-    write(rp, c)
-
-    # Replace frida:rpc references
-    replace(rp, '".add_string_value ("frida:rpc")', '".add_string_value (getRpcStr(false))')
-    replace(rp, 'json.index_of ("\\"frida:rpc\\"")', 'json.index_of (getRpcStr(true))')
-    c = read(rp)
-    # Replace remaining 'type != "frida:rpc"'
-    if 'type != "frida:rpc"' in c:
-        c = c.replace('type != "frida:rpc"', 'type != getRpcStr(false)')
+    if marker is None:
+        print("  WARN: could not find call() method in rpc.vala, patch 0001 skipped")
+    else:
+        idx = c.index(marker)
+        # Insert before this line
+        c = c[:idx] + get_rpc_str + '\n' + c[idx:]
         write(rp, c)
-        print("  OK: frida:rpc type check")
-    print("  OK: lib/base/rpc.vala")
+
+        # Replace frida:rpc references
+        replace(rp, '".add_string_value ("frida:rpc")', '".add_string_value (getRpcStr(false))')
+        replace(rp, 'json.index_of ("\\"frida:rpc\\"")', 'json.index_of (getRpcStr(true))')
+        c = read(rp)
+        if 'type != "frida:rpc"' in c:
+            c = c.replace('type != "frida:rpc"', 'type != getRpcStr(false)')
+            write(rp, c)
+            print("  OK: frida:rpc type check")
+        print("  OK: lib/base/rpc.vala")
 else:
     print(f"  SKIP: {rp} not found")
 
