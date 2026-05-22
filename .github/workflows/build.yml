@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 9/12 * * *"
   workflow_dispatch:
+    inputs:
+      frida_version:
+        description: 'Frida version/tag to build (leave empty for latest)'
+        required: false
+        type: string
   push:
     branches: ["main", "ci"]
     paths:
@@ -24,14 +29,21 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const releaseResponse = await github.repos.getLatestRelease({
-              owner: 'frida',
-              repo: 'frida',
-            })
-            const {
-              data: { tag_name: ver }
-            } = releaseResponse;
-            core.setOutput('FRIDA_VERSION', ver);
+            const inputVersion = '${{ github.event.inputs.frida_version }}';
+            if (inputVersion) {
+              core.info('Using specified version: ' + inputVersion);
+              core.setOutput('FRIDA_VERSION', inputVersion);
+            } else {
+              const releaseResponse = await github.repos.getLatestRelease({
+                owner: 'frida',
+                repo: 'frida',
+              })
+              const {
+                data: { tag_name: ver }
+              } = releaseResponse;
+              core.info('Using latest version: ' + ver);
+              core.setOutput('FRIDA_VERSION', ver);
+            }
 
       - name: Split Repository Name
         id: split_name
