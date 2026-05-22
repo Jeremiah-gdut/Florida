@@ -163,7 +163,7 @@ jobs:
           echo "Apply patches in $path to frida/subprojects/$name"
           cd "frida/subprojects/$name"
           git am --abort 2>/dev/null || true
-          git am --3way "../../../patches/$name/"*.patch
+          git am "../../../patches/$name/"*.patch
           cd ../../..
         done
         
