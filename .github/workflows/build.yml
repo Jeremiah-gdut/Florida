@@ -173,10 +173,16 @@ jobs:
         do
           name=$(basename "$path")
           echo "Apply patches in $path to frida/subprojects/$name"
-          cd "frida/subprojects/$name"
-          git am --abort 2>/dev/null || true
-          git am "../../../patches/$name/"*.patch
-          cd ../../..
+          if [ -f "$path/apply.py" ]; then
+            python3 "$path/apply.py"
+          elif ls "$path/"*.patch 1>/dev/null 2>&1; then
+            cd "frida/subprojects/$name"
+            git am --abort 2>/dev/null || true
+            git am "../../../patches/$name/"*.patch
+            cd ../../..
+          else
+            echo "No patches or apply.py found for $name, skipping"
+          fi
         done
         
         ARCHES="android-arm android-arm64 android-x86 android-x86_64"
