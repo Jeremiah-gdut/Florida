@@ -109,13 +109,14 @@ lh = filepath('src/linux/linux-host-session.vala')
 if os.path.exists(lh):
     c = read(lh)
     # Insert random_prefix before agent = new AgentDescriptor
-    marker = 'agent = new AgentDescriptor (PathTemplate ("frida-agent-<arch>.so"'
+    # Change PathTemplate ("frida-agent-<arch>.so") to PathTemplate (random_prefix + "-<arch>.so")
+    marker = 'agent = new AgentDescriptor (PathTemplate ("frida-agent-<arch>.so")'
     if marker in c:
         c = c.replace(
             marker,
-            'var random_prefix = GLib.Uuid.string_random();\n\t\t\t' + marker.replace('frida-agent-<arch>.so"', 'random_prefix + "-<arch>.so"')
+            'var random_prefix = GLib.Uuid.string_random();\n\t\t\tagent = new AgentDescriptor (PathTemplate (random_prefix + "-<arch>.so")'
         )
-        # Replace resource names
+        # Replace resource names: remove quotes around frida-agent-arm.so, use random_prefix
         c = c.replace(
             'new AgentResource ("frida-agent-arm.so"',
             'new AgentResource (random_prefix + "-arm.so"'
