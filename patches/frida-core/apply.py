@@ -299,16 +299,7 @@ if os.path.exists(ea):
         write(ea, c)
         print("  OK: src/embed-agent.py")
     else:
-        print("  WARN: pattern not found in embed-agent.py, trying alt patterns...")
-        # Try with different indentation
-        alt = re.sub(r'\n(\s+)embedded_assets \+= \[embedded_agent\]', 
-              r'\n            import os\n            custom_script=str(output_dir)+"/../../../../frida/subprojects/frida-core/src/anti-anti-frida.py"\n            return_code = os.system("python3 "+custom_script+" "+str(priv_dir / f"frida-agent-{flavor}.so"))\n            if return_code == 0:\n                print("anti-anti-frida finished")\n            else:\n                print("anti-anti-frida error. Code:", return_code)\n            \n\1embedded_assets += [embedded_agent]',
-              c, count=1)
-        if alt != c:
-            write(ea, alt)
-            print("  OK: src/embed-agent.py (fallback)")
-        else:
-            print("  WARN: could not apply patch 0010")
+        print("  WARN: pattern not found in embed-agent.py, patch 0010 skipped")
 else:
     print(f"  SKIP: {ea} not found")
 
