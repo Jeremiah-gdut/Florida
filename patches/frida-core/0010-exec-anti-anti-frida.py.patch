@@ -1,39 +1,21 @@
-From 2f4e7cb9f0c62f1c555adc136b091a06162e52ea Mon Sep 17 00:00:00 2001
+From a03458cf6c761fbfe0fd7745c54923d66f1918b4 Mon Sep 17 00:00:00 2001
 From: Jerem1ah <1526100148@qq.com>
-Date: Sat, 23 May 2026 00:13:10 +0800
-Subject: [PATCH 10/10] exec anti-anti-frida.py
+Date: Sat, 23 May 2026 00:22:42 +0800
+Subject: [PATCH] exec anti-anti-frida.py
 
 ---
- src/embed-agent.py | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+ src/embed-agent.py | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/src/embed-agent.py b/src/embed-agent.py
-index cfb4a594..db4d093e 100644
+index cfb4a594..29d5bb5b 100644
 --- a/src/embed-agent.py
 +++ b/src/embed-agent.py
-@@ -67,6 +67,16 @@ def main(argv):
-             shutil.copy(agent_modern, embedded_agent)
-         else:
-             shutil.copy(agent_legacy, embedded_agent)
-+        embedded_assets += [embedded_agent]
-+    elif host_os in            import os
-+            custom_script=str(output_dir)+"/../../../../frida/subprojects/frida-core/src/anti-anti-frida.py"
-+            return_code = os.system("python3 "+custom_script+" "+str(priv_dir / f"frida-agent-{flavor}.so"))
-+            if return_code == 0:
-+                print("anti-anti-frida finished")
-+            else:
-+                print("anti-anti-frida error. Code:", return_code)
-+            
-+
-         embedded_assets += [embedded_agent]
-     elif host_os in {"linux", "android"}:
-         for agent, flavor in [(agent_modern, "64"),
-@@ -78,6 +88,16 @@ def main(argv):
+@@ -78,6 +78,14 @@ def main(argv):
                  shutil.copy(agent, embedded_agent)
              else:
                  embedded_agent.write_bytes(b"")
-+            embedded_assets += [embedded_agent]
-+    elif host_os in            import os
++            import os
 +            custom_script=str(output_dir)+"/../../../../frida/subprojects/frida-core/src/anti-anti-frida.py"
 +            return_code = os.system("python3 "+custom_script+" "+str(priv_dir / f"frida-agent-{flavor}.so"))
 +            if return_code == 0:
@@ -41,7 +23,6 @@ index cfb4a594..db4d093e 100644
 +            else:
 +                print("anti-anti-frida error. Code:", return_code)
 +            
-+
              embedded_assets += [embedded_agent]
      elif host_os in {"freebsd", "qnx"}:
          embedded_agent = priv_dir / "frida-agent.so"
