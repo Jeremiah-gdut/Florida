@@ -129,11 +129,25 @@ jobs:
         distribution: "temurin"
         java-version: "17"
 
+    - name: Determine NDK version
+      id: ndk-version
+      shell: bash
+      run: |
+        FRIDA_TAG="${{ needs.check_version.outputs.FRIDA_VERSION }}"
+        CUTOFF="17.8.1"
+        if [ "$(printf '%s\n' "$CUTOFF" "$FRIDA_TAG" | sort -V | head -n1)" = "$CUTOFF" ]; then
+          echo "Using NDK r29 for frida $FRIDA_TAG (>= $CUTOFF)"
+          echo "ndk=r29" >> $GITHUB_OUTPUT
+        else
+          echo "Using NDK r25 for frida $FRIDA_TAG (< $CUTOFF)"
+          echo "ndk=r25" >> $GITHUB_OUTPUT
+        fi
+
     - name: Setup Android NDK
       id: setup-ndk
       uses: nttld/setup-ndk@v1
       with:
-        ndk-version: r29
+        ndk-version: ${{ steps.ndk-version.outputs.ndk }}
         local-cache: false
         link-to-sdk: true
 
