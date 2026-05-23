@@ -176,6 +176,7 @@ jobs:
         FRIDA_TAG="${{ needs.check_version.outputs.FRIDA_VERSION }}"
         echo "Building frida at tag: $FRIDA_TAG"
         
+        git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
         git clone --recurse-submodules https://github.com/frida/frida
         cd frida
         git fetch --tags
