@@ -187,13 +187,25 @@ jobs:
         for path in patches/*
         do
           name=$(basename "$path")
-          echo "Apply patches in $path to frida/subprojects/$name"
+          echo "Apply patches in $path to frida/$name"
+          # Find submodule path (16.x uses frida/<name>, 17.x uses frida/subprojects/<name>)
+          subdir=""
+          if [ -d "frida/subprojects/$name" ]; then
+            subdir="frida/subprojects/$name"
+          elif [ -d "frida/$name" ]; then
+            subdir="frida/$name"
+          fi
+          if [ -z "$subdir" ]; then
+            echo "Submodule $name not found, skipping"
+            continue
+          fi
           if [ -f "$path/apply.py" ]; then
+            # apply.py handles paths internally, update it for subdir
             python3 "$path/apply.py"
           elif ls "$path/"*.patch 1>/dev/null 2>&1; then
-            cd "frida/subprojects/$name"
+            cd "$subdir"
             git am --abort 2>/dev/null || true
-            git am "../../../patches/$name/"*.patch
+            git am "../../patches/$name/"*.patch
             cd ../../..
           else
             echo "No patches or apply.py found for $name, skipping"

@@ -4,7 +4,13 @@ import os, sys, re
 
 base = os.path.dirname(os.path.abspath(__file__))
 root = os.path.normpath(os.path.join(base, '..', '..'))
+# frida 17.x uses subprojects/ prefix, 16.x puts submodules directly under frida/
 frida_core = os.path.join(root, 'frida', 'subprojects', 'frida-core')
+if not os.path.isdir(frida_core):
+    frida_core = os.path.join(root, 'frida', 'frida-core')
+if not os.path.isdir(frida_core):
+    print(f"ERROR: frida-core submodule not found")
+    sys.exit(1)
 
 def filepath(rel):
     return os.path.join(frida_core, rel)
