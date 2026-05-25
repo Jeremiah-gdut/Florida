@@ -1,6 +1,6 @@
-# Florida - Build Guide
+# Florida - 编译指南
 
-## Files Included
+## 包含文件
 
 ```
 patches/
@@ -11,7 +11,7 @@ patches/
     0001-Florida-pool-frida.patch
 ```
 
-## Requirements
+## 环境要求
 
 - Ubuntu 22.04 x86_64
 - Android NDK r25 或 r29
@@ -26,28 +26,31 @@ sudo gem install fpm -v 1.11.0 --no-document
 pip install lief graphlib
 ```
 
-## Build
+## 编译步骤
 
 ```bash
-# 1. Clone frida
+# 1. 克隆 frida 源码
 git clone --recurse-submodules https://github.com/frida/frida
 cd frida
 
-# 2. Checkout desired version
+# 2. 切换到指定版本
 git fetch --tags
 git checkout -f tags/17.9.10
 git submodule update --init --recursive
 cd ..
 
-# 3. Apply Florida patches
+# 3. 应用 Florida 补丁
 python3 patches/frida-core/apply.py
 
-# 4. frida-gum patch (16.x: cd frida/frida-gum, 17.x: cd frida/subprojects/frida-gum)
+# 4. 应用 frida-gum 补丁
+# 17.x 子模块路径:
 cd frida/subprojects/frida-gum
+# 16.x 子模块路径:
+# cd frida/frida-gum
 git am ../../patches/frida-gum/*.patch
 cd ../..
 
-# 5. Build for Android (4 arches)
+# 5. 编译 Android 四个架构
 export ANDROID_NDK_ROOT=/path/to/ndk
 for ARCH in android-arm android-arm64 android-x86 android-x86_64; do
   mkdir build-$ARCH && cd build-$ARCH
@@ -56,7 +59,7 @@ for ARCH in android-arm android-arm64 android-x86 android-x86_64; do
 done
 ```
 
-## Output
+## 编译产物
 
 ```
 build-android-arm/subprojects/frida-core/server/frida-server
@@ -68,8 +71,8 @@ build-android-*/subprojects/frida-core/inject/frida-inject
 build-android-*/subprojects/frida-core/lib/gadget/frida-gadget.so
 ```
 
-## Notes
+## 注意事项
 
-- frida >= 17.8.1 用 NDK r29, < 17.8.1 用 NDK r25
-- frida >= 17.0 子模块在 `frida/subprojects/`, 16.x 在 `frida/` 根目录
-- apply.py 自动处理两种目录结构, 不匹配的修改会打印 WARN 跳过
+- frida >= 17.8.1 用 NDK r29，< 17.8.1 用 NDK r25
+- frida >= 17.0 子模块在 `frida/subprojects/`，16.x 在 `frida/` 根目录
+- `apply.py` 自动处理两种目录结构，不匹配的修改会打印 WARN 跳过，不影响编译
