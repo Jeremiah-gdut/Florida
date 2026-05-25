@@ -302,4 +302,20 @@ if os.path.exists(ea):
 else:
     print(f"  SKIP: {ea} not found")
 
+# ============================================================
+# Patch 0011: zymbiote socket name
+# Obfuscate /frida-zymbiote- abstract socket name
+# ============================================================
+print("\n[0011] zymbiote socket name")
+
+for dirpath, dirnames, filenames in os.walk(frida_core):
+    for fn in filenames:
+        if fn.endswith('.vala'):
+            fp = os.path.join(dirpath, fn)
+            c = read(fp)
+            if '"/frida-zymbiote-"' in c:
+                c = c.replace('"/frida-zymbiote-"', '"/ggbond-zymbiote-"')
+                write(fp, c)
+                print(f"  OK: {os.path.relpath(fp, frida_core)}")
+
 print("\nAll Florida patches applied.")
