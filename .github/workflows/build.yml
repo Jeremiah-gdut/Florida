@@ -200,13 +200,12 @@ jobs:
             continue
           fi
           if [ -f "$path/apply.py" ]; then
-            # apply.py handles paths internally, update it for subdir
             python3 "$path/apply.py"
           elif ls "$path/"*.patch 1>/dev/null 2>&1; then
             cd "$subdir"
             git am --abort 2>/dev/null || true
-            git am "../../patches/$name/"*.patch
-            cd ../../..
+            git am "$OLDPWD/$path/"*.patch
+            cd "$OLDPWD"
           else
             echo "No patches or apply.py found for $name, skipping"
           fi
