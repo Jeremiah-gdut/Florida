@@ -111,6 +111,7 @@ jobs:
           tag_name: "${{ needs.check_version.outputs.FRIDA_VERSION }}"
           name: "${{ needs.check_version.outputs.FRIDA_VERSION }}"
           prerelease: false
+          draft: true
 
   android_build:
     runs-on: ubuntu-22.04
@@ -437,3 +438,8 @@ jobs:
         asset_path: '${{ github.workspace }}/build-android-x86_64/subprojects/frida-gum/bindings/gumjs/libfrida-gumjs-1.0.a.gz'
         asset_name: 'florida-gumjs-${{ needs.check_version.outputs.FRIDA_VERSION }}-android-x86_64.a.gz'
         asset_content_type: application/octet-stream
+
+    - name: Publish release
+      if: success()
+      run: |
+        gh release edit "${{ needs.check_version.outputs.FRIDA_VERSION }}" --draft=false --repo "${{ github.repository }}"
