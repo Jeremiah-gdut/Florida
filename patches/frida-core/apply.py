@@ -304,10 +304,11 @@ else:
 
 # ============================================================
 # Patch 0011: zymbiote socket name
-# Obfuscate /frida-zymbiote- abstract socket name
+# Obfuscate /frida-zymbiote- abstract socket name (introduced in frida 17.6.0+)
 # ============================================================
 print("\n[0011] zymbiote socket name")
 
+zymbiote_found = False
 for dirpath, dirnames, filenames in os.walk(frida_core):
     for fn in filenames:
         if fn.endswith('.vala'):
@@ -317,5 +318,8 @@ for dirpath, dirnames, filenames in os.walk(frida_core):
                 c = c.replace('"/frida-zymbiote-"', '"/ggbond-zymbiote-"')
                 write(fp, c)
                 print(f"  OK: {os.path.relpath(fp, frida_core)}")
+                zymbiote_found = True
+if not zymbiote_found:
+    print("  WARN: /frida-zymbiote- not found (version < 17.6.0, skipping)")
 
 print("\nAll Florida patches applied.")
